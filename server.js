@@ -1,3 +1,4 @@
+// app.js / server.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -8,21 +9,19 @@ connectDB();
 
 const app = express();
 
-// CORS Setup
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://sensational-licorice-e2fd88.netlify.app",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+// CORS configuration
+const corsOptions = {
+  origin: [
+    "http://localhost:5173", // local development
+    "https://sensational-licorice-e2fd88.netlify.app", // frontend deployed URL
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // if using cookies or sessions
+};
 
-// Preflight request handle
-app.options("*", cors());
+// Apply CORS for all routes
+app.use(cors(corsOptions));
 
 // JSON body parser
 app.use(express.json());
@@ -41,6 +40,11 @@ app.use("/api/expenses", require("./routes/expenseRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/otp", require("./routes/otpRoutes"));
+
+// Handle unknown routes
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
